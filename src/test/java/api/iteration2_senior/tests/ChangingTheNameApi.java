@@ -35,7 +35,6 @@ public class ChangingTheNameApi extends BaseTest {
         CustomerProfileUpdateRequest customerProfileUpdateRequest = CustomerProfileUpdateRequest
                 .builder().name(validName).build();
 
-
         CustomerProfileUpdateResponse customerProfileUpdateResponse = new ValidatedCrudRequester<CustomerProfileUpdateResponse>(RequestSpecs.userAuthSpec(authTokenUser),
                 Endpoint.CUSTOMER_PROFILE_UPDATE,
                 ResponseSpecs.profileUpdatedSuccessfully())
