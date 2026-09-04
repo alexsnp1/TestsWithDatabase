@@ -14,5 +14,7 @@ public class Transactions {
     private double amount;
     private String type;
     private String timestamp;
+    private String timestampAsString;
     private int relatedAccountId;
+    private int amountAsDouble;
 }

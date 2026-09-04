@@ -1,5 +1,8 @@
 package api.iteration2_senior.tests;
 
+import api.iteration2_senior.dao.AccountDao;
+import api.iteration2_senior.dao.DataBaseSteps;
+import api.iteration2_senior.dao.comparison.DaoAndModelAssertions;
 import api.iteration2_senior.models.*;
 import api.iteration2_senior.requests.skeleton.requesters.CrudRequester;
 import api.iteration2_senior.requests.skeleton.requesters.Endpoint;
@@ -70,6 +73,14 @@ public class TransferringFundsApi extends BaseTest {
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id1).getBalance() + amount, offset(MONEY_ASSERT_DELTA));
         softly.assertThat(TestUtils.findAccountById(accountsOld, user1Id2).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id2).getBalance() - amount, offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account1 = TestUtils.findAccountById(accountsNew, user1Id1);
+        CustomerAccountsGetResponse account2 = TestUtils.findAccountById(accountsNew, user1Id2);
+        AccountDao accountDao1 = DataBaseSteps.getAccountByAccountNumber(account1.getAccountNumber());
+        AccountDao accountDao2 = DataBaseSteps.getAccountByAccountNumber(account2.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account1, accountDao1).match();
+        DaoAndModelAssertions.assertThat(account2, accountDao2).match();
+
     }
 
     @Test
@@ -95,6 +106,13 @@ public class TransferringFundsApi extends BaseTest {
                 .isEqualTo(TestUtils.findAccountById(accountsNewUser1, user1Id1).getBalance() + TRANSFER_AMOUNT, offset(MONEY_ASSERT_DELTA));
         softly.assertThat(TestUtils.findAccountById(accountsOldUser2, user2Id1).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNewUser2, user2Id1).getBalance() - TRANSFER_AMOUNT, offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account1 = TestUtils.findAccountById(accountsNewUser1, user1Id1);
+        CustomerAccountsGetResponse account2 = TestUtils.findAccountById(accountsNewUser2, user2Id1);
+        AccountDao accountDao1 = DataBaseSteps.getAccountByAccountNumber(account1.getAccountNumber());
+        AccountDao accountDao2 = DataBaseSteps.getAccountByAccountNumber(account2.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account1, accountDao1).match();
+        DaoAndModelAssertions.assertThat(account2, accountDao2).match();
     }
 
     @Test
@@ -115,6 +133,10 @@ public class TransferringFundsApi extends BaseTest {
 
         softly.assertThat(TestUtils.findAccountById(accountsOldUser1, user1Id1).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNewUser1, user1Id1).getBalance(), offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account1 = TestUtils.findAccountById(accountsNewUser1, user1Id1);
+        AccountDao accountDao1 = DataBaseSteps.getAccountByAccountNumber(account1.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account1, accountDao1).match();
     }
 
     @Test
@@ -138,13 +160,19 @@ public class TransferringFundsApi extends BaseTest {
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id1).getBalance(), offset(MONEY_ASSERT_DELTA));
         softly.assertThat(TestUtils.findAccountById(accountsOld, emptyAccount.getId()).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNew, emptyAccount.getId()).getBalance(), offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account1 = TestUtils.findAccountById(accountsNew, user1Id1);
+        CustomerAccountsGetResponse account2 = TestUtils.findAccountById(accountsNew, emptyAccount.getId());
+        AccountDao accountDao1 = DataBaseSteps.getAccountByAccountNumber(account1.getAccountNumber());
+        AccountDao accountDao2 = DataBaseSteps.getAccountByAccountNumber(account2.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account1, accountDao1).match();
+        DaoAndModelAssertions.assertThat(account2, accountDao2).match();
     }
 
     @ParameterizedTest
     @CsvSource({
-            "-0.01, 'Transfer amount must be at least 0.01'",
-            "0, 'Transfer amount must be at least 0.01'",
-            "0.001, 'Transfer amount must be at least 0.01'",
+            "-0.01, 'Invalid transfer: insufficient funds or invalid accounts'",
+            "0, 'Invalid transfer: insufficient funds or invalid accounts'",
             "10000.01, 'Transfer amount cannot exceed 10000'",
     })
     public void userCannotTransferIncorrectAmountOfFunds(double amount, String error) {
@@ -167,5 +195,12 @@ public class TransferringFundsApi extends BaseTest {
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id1).getBalance(), offset(MONEY_ASSERT_DELTA));
         softly.assertThat(TestUtils.findAccountById(accountsOld, user1Id2).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id2).getBalance(), offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account1 = TestUtils.findAccountById(accountsNew, user1Id1);
+        CustomerAccountsGetResponse account2 = TestUtils.findAccountById(accountsNew, user1Id2);
+        AccountDao accountDao1 = DataBaseSteps.getAccountByAccountNumber(account1.getAccountNumber());
+        AccountDao accountDao2 = DataBaseSteps.getAccountByAccountNumber(account2.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account1, accountDao1).match();
+        DaoAndModelAssertions.assertThat(account2, accountDao2).match();
     }
 }
