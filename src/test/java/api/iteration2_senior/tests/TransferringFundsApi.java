@@ -80,7 +80,6 @@ public class TransferringFundsApi extends BaseTest {
         AccountDao accountDao2 = DataBaseSteps.getAccountByAccountNumber(account2.getAccountNumber());
         DaoAndModelAssertions.assertThat(account1, accountDao1).match();
         DaoAndModelAssertions.assertThat(account2, accountDao2).match();
-
     }
 
     @Test
