@@ -1,6 +1,10 @@
 package api.iteration2_senior.tests;
 
+import api.iteration2_senior.dao.DataBaseSteps;
+import api.iteration2_senior.dao.UserDao;
+import api.iteration2_senior.dao.comparison.DaoAndModelAssertions;
 import api.iteration2_senior.models.*;
+import api.iteration2_senior.models.comparison.ModelAssertions;
 import api.iteration2_senior.requests.skeleton.requesters.CrudRequester;
 import api.iteration2_senior.requests.skeleton.requesters.Endpoint;
 import api.iteration2_senior.requests.skeleton.requesters.ValidatedCrudRequester;
@@ -17,11 +21,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 public class ChangingTheNameApi extends BaseTest {
     private String authTokenUser;
+    AdminCreateUserRequest user;
     private final String validName = RandomData.getRandomValidName();
 
     @BeforeEach
     public void setUp() {
-        AdminCreateUserRequest user = UserCreationStep.createUserRequest();
+        user = UserCreationStep.createUserRequest();
         authTokenUser = AuthenticationStep.getUserTokenStep(user);
     }
 
@@ -34,11 +39,12 @@ public class ChangingTheNameApi extends BaseTest {
                 Endpoint.CUSTOMER_PROFILE_UPDATE,
                 ResponseSpecs.profileUpdatedSuccessfully())
                 .put(customerProfileUpdateRequest);
-        softly.assertThat(validName).isEqualTo(customerProfileUpdateResponse.getCustomer().getName());
+//        softly.assertThat(customerProfileUpdateRequest.getName()).isEqualTo(customerProfileUpdateResponse.getCustomer().getName());
+        System.out.println(user.getUsername());
+        ModelAssertions.assertThatModels(customerProfileUpdateRequest, customerProfileUpdateResponse).match();
 
-//        CustomerProfileGetResponse customerProfileGetResponse =
-//                CustomerProfileStep.getCustomerProfileResponse(authTokenUser);
-//        softly.assertThat(validName).isEqualTo(customerProfileGetResponse.getName());
+        UserDao userDao = DataBaseSteps.getUserByUsername(user.getUsername());
+        DaoAndModelAssertions.assertThat(customerProfileUpdateResponse, userDao).match();
     }
 
     @ParameterizedTest
@@ -58,7 +64,10 @@ public class ChangingTheNameApi extends BaseTest {
 
         CustomerProfileGetResponse customerProfileGetResponseNew =
                 CustomerProfileStep.getCustomerProfileResponse(authTokenUser);
-        softly.assertThat(customerProfileGetResponseOld.getName()).isEqualTo(customerProfileGetResponseNew.getName());
+//        softly.assertThat(customerProfileGetResponseOld.getName()).isEqualTo(customerProfileGetResponseNew.getName());
+        ModelAssertions.assertThatModels(customerProfileGetResponseOld, customerProfileGetResponseNew).match();
+        UserDao userDao = DataBaseSteps.getUserByUsername(user.getUsername());
+        DaoAndModelAssertions.assertThat(customerProfileGetResponseNew, userDao).match();
     }
 
     @Test
@@ -75,6 +84,11 @@ public class ChangingTheNameApi extends BaseTest {
 
         CustomerProfileGetResponse customerProfileGetResponseNew =
                 CustomerProfileStep.getCustomerProfileResponse(authTokenUser);
-        softly.assertThat(customerProfileGetResponseOld.getName()).isEqualTo(customerProfileGetResponseNew.getName());
+//        softly.assertThat(customerProfileGetResponseOld.getName()).isEqualTo(customerProfileGetResponseNew.getName());
+        ModelAssertions.assertThatModels(customerProfileGetResponseOld, customerProfileGetResponseNew).match();
+        UserDao userDao = DataBaseSteps.getUserByUsername(user.getUsername());
+        DaoAndModelAssertions.assertThat(customerProfileGetResponseNew, userDao).match();
+
+
     }
 }

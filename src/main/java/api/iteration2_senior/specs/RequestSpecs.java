@@ -3,6 +3,8 @@ package api.iteration2_senior.specs;
 import api.iteration2_senior.configs.Config;
 import api.iteration2_senior.utils.Headers;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
@@ -14,8 +16,8 @@ public class RequestSpecs {
         return new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
-//                .addFilter(new RequestLoggingFilter())
-//                .addFilter(new ResponseLoggingFilter())
+                .addFilter(new RequestLoggingFilter())
+                .addFilter(new ResponseLoggingFilter())
                 .setBaseUri(Config.getProperty("server") + Config.getProperty("apiVersion"));
     }
 

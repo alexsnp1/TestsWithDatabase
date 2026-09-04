@@ -1,5 +1,8 @@
 package api.iteration2_senior.tests;
 
+import api.iteration2_senior.dao.AccountDao;
+import api.iteration2_senior.dao.DataBaseSteps;
+import api.iteration2_senior.dao.comparison.DaoAndModelAssertions;
 import api.iteration2_senior.models.*;
 import api.iteration2_senior.requests.skeleton.requesters.CrudRequester;
 import api.iteration2_senior.requests.skeleton.requesters.Endpoint;
@@ -46,19 +49,20 @@ public class DepositingFundsApi extends BaseTest {
         CustomerAccountsGetResponse[] accountsOld = CustomerAccountStep.getCustomerAccountResponse(authTokenUser1);
 
         DepositFundsStep.depositFunds(authTokenUser1, user1Id1, balance);
-
         CustomerAccountsGetResponse[] accountsNew = CustomerAccountStep.getCustomerAccountResponse(authTokenUser1);
-
         softly.assertThat(TestUtils.findAccountById(accountsOld, user1Id1).getBalance() + balance)
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id1).getBalance());
+
+        CustomerAccountsGetResponse account = TestUtils.findAccountById(accountsNew, user1Id1);
+        AccountDao accountDao = DataBaseSteps.getAccountByAccountNumber(account.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account, accountDao).match();
     }
 
     @ParameterizedTest
     @CsvSource({
-            "-0.01, 'Deposit amount must be at least 0.01'",
-            "0, 'Deposit amount must be at least 0.01'",
-            "0.001, 'Deposit amount must be at least 0.01'",
-            "5000.01, 'Deposit amount cannot exceed 5000'",
+            "-0.01, 'Invalid account or amount'",
+            "0, 'Invalid account or amount'",
+            "5000.01, 'Deposit amount exceeds the 5000 limit'",
     })
     public void userCannotDepositIncorrectAmountOfFunds(double balance, String error) {
         CustomerAccountsGetResponse[] accountsOld = CustomerAccountStep.getCustomerAccountResponse(authTokenUser1);
@@ -74,6 +78,10 @@ public class DepositingFundsApi extends BaseTest {
         CustomerAccountsGetResponse[] accountsNew = CustomerAccountStep.getCustomerAccountResponse(authTokenUser1);
         softly.assertThat(TestUtils.findAccountById(accountsOld, user1Id1).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user1Id1).getBalance(), offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account = TestUtils.findAccountById(accountsNew, user1Id1);
+        AccountDao accountDao = DataBaseSteps.getAccountByAccountNumber(account.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account, accountDao).match();
     }
 
     @Test
@@ -90,6 +98,10 @@ public class DepositingFundsApi extends BaseTest {
         CustomerAccountsGetResponse[] accountsNew = CustomerAccountStep.getCustomerAccountResponse(authTokenUser2);
         softly.assertThat(TestUtils.findAccountById(accountsOld, user2Id1).getBalance())
                 .isEqualTo(TestUtils.findAccountById(accountsNew, user2Id1).getBalance(), offset(MONEY_ASSERT_DELTA));
+
+        CustomerAccountsGetResponse account = TestUtils.findAccountById(accountsNew, user2Id1);
+        AccountDao accountDao = DataBaseSteps.getAccountByAccountNumber(account.getAccountNumber());
+        DaoAndModelAssertions.assertThat(account, accountDao).match();
     }
 
     @Test
